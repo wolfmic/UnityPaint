@@ -218,9 +218,15 @@ public class PaintView : MonoBehaviour
         _lastPoint = point;
     }
 
+    public void ForcePaint(Vector2 point)
+    {
+        Paint(point);
+    }
+
     //画点
     private void Paint(Vector2 point)
     {
+
         if (point.x < 0 || point.x > _screenWidth || point.y < 0 || point.y > _screenHeight)
             return;
 
