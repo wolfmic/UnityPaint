@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 
 public class PaintView : MonoBehaviour
@@ -56,6 +57,29 @@ public class PaintView : MonoBehaviour
     private Vector2 _lastPoint;
 	#endregion
 
+    [SerializeField]
+    private InputAction _drawAction;
+
+    [SerializeField]
+    private InputAction _clearAction;
+
+    [SerializeField]
+    private InputAction _drawPositionAction;
+
+    void OnEnable()
+    {
+        _drawAction.Enable();
+        _clearAction.Enable();
+        _drawPositionAction.Enable();
+    }
+
+    void OnDisable()
+    {
+        _drawAction.Disable();
+        _clearAction.Disable();
+        _drawPositionAction.Disable();
+    }
+
 	void Start()
 	{
 		InitData();
@@ -64,8 +88,19 @@ public class PaintView : MonoBehaviour
 	private void Update()
 	{
 		Color clearColor = new Color(0, 0, 0, 0);
-		if (Input.GetKeyDown(KeyCode.Space))
+		if (_clearAction.triggered)
 			_paintBrushMat.SetColor("_Color", clearColor);
+
+        if (_renderTex && _paintBrushMat)
+        {
+            if (_drawAction.ReadValue<float>() > 0) {
+                LerpPaint(_drawPositionAction.ReadValue<Vector2>());
+            }
+           
+        }
+
+        if (_drawAction.ReadValue<float>() == 0)
+            _lastPoint = Vector2.zero;
 	}
 
 
@@ -119,29 +154,6 @@ public class PaintView : MonoBehaviour
             _brushSizeText=slider.transform.Find("Background/Text").GetComponent<Text>();
         }
         _brushSizeText.text = slider.value.ToString("f2");
-    }
-
-    /// <summary>
-    /// 拖拽
-    /// </summary>
-    public void DragUpdate()
-    {
-        if (_renderTex && _paintBrushMat)
-        {
-
-            if (Input.GetMouseButton(0))
-                LerpPaint(Input.mousePosition);
-
-           
-        }
-    }
-    /// <summary>
-    /// 拖拽结束
-    /// </summary>
-    public void DragEnd()
-    {
-        if (Input.GetMouseButtonUp(0))
-            _lastPoint = Vector2.zero;
     }
 
     #endregion
